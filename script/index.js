@@ -1,3 +1,24 @@
+
+
+
+
+const createElement=(arr)=>{
+    const  htmleElements=arr.map(el => ` <span   class="btn">${el}</span>`)
+    return(htmleElements.join(" "));
+}
+const manageSpinner=(status)=>{
+    if(status == true){
+        document.getElementById("spinner").classList.remove("hidden");
+        document.getElementById("word-container").classList.add("hidden");
+    }
+    else{
+         document.getElementById("spinner").classList.add("hidden");
+        document.getElementById("word-container").classList.remove("hidden");
+    }
+
+}
+
+
 const loadLessons = () => {
     fetch("https://openapi.programming-hero.com/api/levels/all")
         .then((res) => res.json())
@@ -11,6 +32,7 @@ const removeActive=()=>{
 }
 
 const loadLevelWord = (id) => {
+    manageSpinner(true);
     const url = `https://openapi.programming-hero.com/api/level/${id}`
     fetch(url)
         .then((res) => res.json())
@@ -36,7 +58,26 @@ loadWordDetail=async(id)=>{
 const  displayWordDetails  =(word)=>{
 console.log(word)
 const   detailBox=document.getElementById("details-container");
-// detailBox.innerHTML="Hi  Im  From  js "
+detailBox.innerHTML=` <div class="">
+          <h2 class="text-2xl font-bold">${word.word} (<i class="fa-solid fa-microphone-lines"></i>
+            : ${word.pronunciation} )</h2>
+        </div>
+        <div class="">
+          <h2 class=" font-bold">Meaning </h2>
+          <p>${word.meaning} </p>
+        </div>
+        
+        <div class="">
+          <h2 class="font-bold">Example</h2>
+          <p>${word.sentence}
+          </p>
+          </div>
+          <div class="">
+            <h2 class=" font-bold">Synonym</h2>
+            <div class="">
+            ${createElement(word.synonyms)}
+        </div>
+        </div>`
 document.getElementById("word-modal").showModal();
 }
 
@@ -51,6 +92,7 @@ const displayLevelWord = (words) => {
      <p  class="text-xl font-medium  text-gray-500">এই Lesson এ এখনো কোন Vocabulary যুক্ত করা হয়নি।</p>
      <h2 class="font-bold  text-4xl">নেক্সট Lesson এ যান</h2>
       </div>`;
+      manageSpinner(false)
         return;
     }
 
@@ -80,10 +122,8 @@ const displayLevelWord = (words) => {
 
     `
         wordContainer.append(card);
-
-
-
     });
+    manageSpinner(false);
 }
 
 const displayLessons = (lessons) => {
@@ -116,3 +156,20 @@ onClick="loadLevelWord(${lesson.level_no})"
 
 
 loadLessons()
+
+
+
+document.getElementById("btn-serch").addEventListener("click",()=>{
+    removeActive()
+    const input=document.getElementById("input-serch");
+    const  searchValue=input.value.trim().toLowerCase();
+    // console.log(searchValue);
+
+    fetch("https://openapi.programming-hero.com/api/words/all")
+    .then((res)=>res.json())
+    .then((data)=>{
+        const  allwords=data.data
+       const  filterWords=allwords.filter(word=>word.word.toLowerCase().includes(searchValue));
+       displayLevelWord(filterWords);
+    });
+})
